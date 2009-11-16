@@ -144,15 +144,15 @@ int __stdcall TagHandler(CPhidgetRFIDHandle RFID, void *usrptr, unsigned char *T
 	}
 	else
 	{
-		/*time_t rawtime;
+		time_t * rawtime = new time_t;
 		struct tm * timeinfo;
-		time ( &rawtime );
-		timeinfo = localtime ( &rawtime );*/
+		time ( rawtime );
+		timeinfo = localtime ( rawtime );
 		
 		char t[100];
 		sprintf_s(t,"%ld",time(NULL));
 
-		cout << "Tag Read: " << users.getuser(tag) << " with tag: " << tagIDs.getuser(tag) << " at " << (string)t;//asctime(timeinfo);
+		cout << "Tag Read: " << users.getuser(tag) << " with tag: " << tagIDs.getuser(tag) << " at " << asctime(timeinfo);
 		if(allowentry(tag))
 		{
 			swipe(users.getuser(tag));
@@ -160,11 +160,11 @@ int __stdcall TagHandler(CPhidgetRFIDHandle RFID, void *usrptr, unsigned char *T
 		}
 		else
 			cout << "Access denied\n>";
-
+		delete timeinfo;
+		//delete rawtime;
 	}
 		adding = false;
 		tagadd = false;
-
 	//printf("Tag Read: %02x%02x%02x%02x%02x\n", TagVal[0], TagVal[1], TagVal[2], TagVal[3], TagVal[4]);
 	return 0;
 }
@@ -192,14 +192,14 @@ void swipe(string user)
 	listall();
 	char t[100];
 	sprintf_s(t,"%ld",time(NULL));
-	//char* formatted = new char;
-	//time_t rawtime;
-	//struct tm * timeinfo;
-	//time ( &rawtime );
-	//timeinfo = localtime ( &rawtime );
-	//strftime(formatted,20,"%H:%M-%m/%d",timeinfo);
-	//string toput = (string)formatted + "," + (string)t;
-	string toput = "," + (string)t;
+	char* formatted = new char;
+	time_t * rawtime = new time_t;
+	struct tm * timeinfo;
+	time ( rawtime );
+	timeinfo = localtime ( rawtime );
+	strftime(formatted,20,"%H:%M-%m/%d",timeinfo);
+	string toput = (string)formatted + "," + (string)t;
+	//string toput = "," + (string)t;
 	string names = ",";
 	for (int i = 0; i < users.size(); i++)
 	{
@@ -210,6 +210,9 @@ void swipe(string user)
 	outputfile("log"+names.substr(1),toput);
 	outputfile(users.getuser(tag), (string)t + "," + users.getnote(users.getuser(tag)));
 	//cout << ">";
+	//delete formatted;
+	//delete rawtime;	//if rawtime is deleted, program crashes on 32bit machines
+	//delete timeinfo;
 }
 
 
@@ -334,6 +337,7 @@ void listall()
 		//users.setbac(i,level);
 		names += "," + users.getuser(i);
 		toput += "," + (string)lognum;
+		delete lognum;
 	}
 	//outputfile("bac"+names,toput);
 	cout << "-----------------------------------------------------------------\n";
